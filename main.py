@@ -78,11 +78,20 @@ session.add(sale_5)
 
 session.commit()
 
-info = input('Введите данные: ')
-result = session.query(Book, Shop, Sale).filter((Publisher.name == info) or (Publisher.id == info))\
-    .filter(Publisher.id == Book.id_publisher).filter(Book.id_publisher == Stock.id_book)\
-    .filter(Stock.id_shop == Shop.id).filter(Stock.id == Sale.id_stock).all()
-for el in result:
-    print(f'{el[0]} | {el[1]} | {el [2]}')
+def get_shops(info): #Функция принимает обязательный параметр
+    result = session.query(Book.title, Shop.name, Sale.price, Sale.date_sale).select_from(Shop).\
+    join(Stock).\
+    join(Book).\
+    join(Publisher).\
+    join(Sale)
+    if info.isdigit(): 
+        result_info = result.filter(Publisher.id == info).all()
+    else:
+        result_info = result.filter(Publisher.name == info).all()
+    for book, shop, sale, stock in result_info:
+        print(f"{book: <40} | {shop: <10} | {sale: <8} | {stock.strftime('%d-%m-%Y')}")
 
+if __name__ == '__main__':
+    info = input("Введите данные: ")
+    get_shops(info) 
 session.close()
